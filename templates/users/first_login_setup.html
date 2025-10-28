@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'frontend/first_login.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="first-login-setup">
+    <h1>Account Setup</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert 
+                {% if message.tags == 'success' %}alert-success
+                {% elif message.tags == 'error' %}alert-danger
+                {% elif message.tags == 'warning' %}alert-warning
+                {% else %}alert-info{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if not show_otp_form and not show_password_form %}
+    <div class="verification-start">
+        <p>To secure your account, we need to verify your phone number first.</p>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="send_otp">
+            <button type="submit">Send Verification Code</button>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if show_otp_form %}
+    <div class="otp-verification">
+        <div class="otp-icon">📱</div>
+        <p>Please enter the 4-digit code sent to your phone number <strong>+63********09</strong>.</p>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="verify_otp">
+            <div class="otp-inputs">
+                <input type="text" name="otp_1" maxlength="1" required>
+                <input type="text" name="otp_2" maxlength="1" required>
+                <input type="text" name="otp_3" maxlength="1" required>
+                <input type="text" name="otp_4" maxlength="1" required>
+            </div>
+            <button type="submit">Verify Account</button>
+        </form>
+        <form method="post" style="margin-top:10px;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="send_otp">
+            <button type="submit" class="btn-secondary">Resend Code</button>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if show_password_form %}
+    <div class="password-setup">
+        <p>Please set a new password for your account. Password must be at least 8 characters.</p>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="change_password">
+
+            <div class="form-group">
+                <label for="new_password">New password</label>
+                <input type="password" name="new_password" id="new_password" required minlength="8" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">Confirm password</label>
+                <input type="password" name="confirm_password" id="confirm_password" required minlength="8" class="form-control">
+            </div>
+
+            <button type="submit">Save Password</button>
+            <a href="{% url 'logout' %}" class="btn-secondary">Cancel</a>
+        </form>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    document.querySelectorAll('.otp-inputs input').forEach((input, index, arr) => {
+        input.addEventListener('input', () => {
+            if (input.value && index < arr.length - 1) {
+                arr[index + 1].focus();
+            }
+        });
+    });
+
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', () => {
+            const btn = form.querySelector('button[type="submit"]');
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = "Processing...";
+            }
+        });
+    });
+
+    window.addEventListener('error', function() {
+        const alertBox = document.createElement('div');
+        alertBox.className = 'alert alert-danger';
+        alertBox.textContent = 'Something went wrong. Please try again.';
+        document.querySelector('.first-login-setup').prepend(alertBox);
+    });
+</script>
+{% endblock %}

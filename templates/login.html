@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}Login - Kooptimizer{% endblock %}
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#3367D6">
+
+{% block content%}
+{% comment %} Per-app templates should not render Django messages directly; the base template provides a floating message UI. {% endcomment %}
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <link rel="stylesheet" href="{% static 'frontend/login.css' %}">
+    
+    <section id="login">
+        <h2>Login</h2>
+        <form id="login-form" method="POST">
+            {% csrf_token %} 
+            
+            <div>
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required>
+            </div>
+
+            <div>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+
+            <div id="recaptcha-placeholder" class="g-recaptcha" data-sitekey="6LeepvErAAAAAP3XNLdmBipdELXOuZqfo13T6lYE">
+                </div>
+
+            <button type="submit">Login</button>
+
+        </form>
+    </section>
+
+{% endblock %}
